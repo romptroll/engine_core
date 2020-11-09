@@ -1,6 +1,6 @@
 
 [package]
-name = "rust_ecs"
+name = "rust_log"
 version = "0.0.0"
 authors = ["Tor Ludwig Bogsveen <romptroll@hotmail.com>"]
 edition = "2018"
