@@ -23,11 +23,18 @@
 
 #[macro_use]
 pub mod log;
+pub mod window;
 
 
 #[cfg(test)]
 mod tests {
     
+    #[test]
+    fn multiple_windows() {
+        assert!(crate::window::Window::new(600, 400, "win1").is_some());
+        assert!(crate::window::Window::new(600, 400, "win2").is_some());
+    }
+
     #[test]
     fn info_test() {
         info_log!("hello there");

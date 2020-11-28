@@ -8,3 +8,5 @@ edition = "2018"
 
 [dependencies]
 colored = "1.9.3"
+glfw = "0.37.0"
+bus = "2.2.3"
