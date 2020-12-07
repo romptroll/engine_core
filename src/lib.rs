@@ -24,15 +24,34 @@
 #[macro_use]
 pub mod log;
 pub mod window;
-
+pub mod input;
 
 #[cfg(test)]
 mod tests {
     
+    use crate::{input::Input, window::{Window, Mouse, MouseButtonLeft}};
+
     #[test]
     fn multiple_windows() {
         assert!(crate::window::Window::new(600, 400, "win1").is_some());
         assert!(crate::window::Window::new(600, 400, "win2").is_some());
+    }
+
+    #[test]
+    fn input() {
+        let mut win = Window::new(600, 400, "input").unwrap();
+        win.make_current();
+
+        let mut input = Input::new(&mut win);
+
+        loop {
+            win.poll_events();
+            input.update();
+
+            if input.mouse_up(MouseButtonLeft) {
+                info_log!("{} : {}", input.mouse_x(), input.mouse_y());
+            }
+        }
     }
 
     #[test]

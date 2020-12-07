@@ -31,6 +31,10 @@ pub type Action = glfw::Action;
 pub type Key    = glfw::Key;
 pub type Mouse  = glfw::MouseButton;
 
+pub use glfw::MouseButtonLeft as MouseButtonLeft;
+pub use glfw::MouseButtonRight as MouseButtonRight;
+pub use glfw::MouseButtonMiddle as MouseButtonMiddle;
+
 pub static mut GLFW: std::option::Option::<glfw::Glfw> = std::option::Option::None;
 
 struct WindowEventSenders {
@@ -133,15 +137,15 @@ impl Window {
                     }
                 },
                 //TODO make sure the framebuffer changes actually happen
-                /*glfw::WindowEvent::FramebufferSize(w, h) => {
-                    unsafe { gl_call!(gl::Viewport(0, 0, w, h)); };
+                glfw::WindowEvent::FramebufferSize(w, h) => {
+                    //unsafe { gl_call!(gl::Viewport(0, 0, w, h)); };
                     for sender in &mut self.event_senders.frame_buffer {
                         match sender.try_broadcast((w as u32, h as u32)) {
                             Ok(_) => {},
                             Err(_) => {} //{core::logger::error("Window failed to notify children of a framebuffer size change!")},
                         }
                     }
-                },*/
+                },
                 _ => { 
                     //engine::logger::info("dd");
                 },
