@@ -51,6 +51,10 @@ mod tests {
             if input.mouse_up(MouseButtonLeft) {
                 info_log!("{} : {}", input.mouse_x(), input.mouse_y());
             }
+
+            if input.mouse_scroll_y() != 0.0 {
+                info_log!("{}", input.mouse_scroll_y());
+            }
         }
     }
 

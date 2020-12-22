@@ -41,6 +41,7 @@ struct WindowEventSenders {
     key            : Vec<bus::Bus::<(Key, Action)>>,
     mouse          : Vec<bus::Bus::<(Mouse, Action)>>,
     mouse_move     : Vec<bus::Bus::<(f32, f32)>>,
+    mouse_scroll   : Vec<bus::Bus::<(f32, f32)>>,
     frame_buffer   : Vec<bus::Bus::<(u32, u32)>>,
 }
 
@@ -50,6 +51,7 @@ impl WindowEventSenders {
             key         : Vec::new(),
             mouse       : Vec::new(),
             mouse_move  : Vec::new(),
+            mouse_scroll: Vec::new(),
             frame_buffer: Vec::new(),
         }
     }
@@ -126,6 +128,14 @@ impl Window {
                         }
                     }
                 },
+                glfw::WindowEvent::Scroll(x, y) => {
+                    for sender in &mut self.event_senders.mouse_scroll {
+                        match sender.try_broadcast((x as f32, y as f32)) {
+                            Ok(_) => {},
+                            Err(_) => {}
+                        }
+                    }
+                },
                 glfw::WindowEvent::CursorPos(x, y) => {
                     let x = ((x as f32 / self.get_width() as f32) - 0.5) * 2.0;
                     let y = ((y as f32 / self.get_height() as f32) - 0.5) * -2.0;
@@ -164,6 +174,7 @@ impl Window {
         self.glfw_window.set_key_polling(true);
         self.glfw_window.set_mouse_button_polling(true);
         self.glfw_window.set_cursor_pos_polling(true);
+        self.glfw_window.set_scroll_polling(true);
         self.glfw_window.set_framebuffer_size_polling(true);
     }
 
@@ -187,6 +198,13 @@ impl Window {
         let mut bus = Bus::new(64);
         let reader = bus.add_rx();
         self.event_senders.mouse_move.push(bus);
+        reader   
+    }
+
+    pub fn create_mouse_scroll_listener(&mut self) -> bus::BusReader::<(f32, f32)> {
+        let mut bus = Bus::new(64);
+        let reader = bus.add_rx();
+        self.event_senders.mouse_scroll.push(bus);
         reader   
     }
 
