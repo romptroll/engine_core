@@ -55,6 +55,10 @@ mod tests {
             if input.mouse_scroll_y() != 0.0 {
                 info_log!("{}", input.mouse_scroll_y());
             }
+
+            if input.chars().len() > 0 {
+                info_log!("{}", input.chars().iter().collect::<String>());
+            }
         }
     }
 

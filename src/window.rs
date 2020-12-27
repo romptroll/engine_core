@@ -43,6 +43,7 @@ struct WindowEventSenders {
     mouse_move     : Vec<bus::Bus::<(f32, f32)>>,
     mouse_scroll   : Vec<bus::Bus::<(f32, f32)>>,
     frame_buffer   : Vec<bus::Bus::<(u32, u32)>>,
+    text           : Vec<bus::Bus::<char>>,
 }
 
 impl WindowEventSenders {
@@ -53,6 +54,7 @@ impl WindowEventSenders {
             mouse_move  : Vec::new(),
             mouse_scroll: Vec::new(),
             frame_buffer: Vec::new(),
+            text        : Vec::new(),
         }
     }
 }
@@ -156,6 +158,14 @@ impl Window {
                         }
                     }
                 },
+                glfw::WindowEvent::Char(ch) => {
+                    for sender in &mut self.event_senders.text {
+                        match sender.try_broadcast(ch) {
+                            Ok(_) => {},
+                            Err(_) => {} 
+                        }
+                    }
+                },
                 _ => { 
                     //engine::logger::info("dd");
                 },
@@ -176,6 +186,7 @@ impl Window {
         self.glfw_window.set_cursor_pos_polling(true);
         self.glfw_window.set_scroll_polling(true);
         self.glfw_window.set_framebuffer_size_polling(true);
+        self.glfw_window.set_char_polling(true);
     }
 
     pub fn should_close(&self) -> bool { self.glfw_window.should_close() }
@@ -208,10 +219,10 @@ impl Window {
         reader   
     }
 
-    pub fn create_frame_buffer_listener(&mut self) -> bus::BusReader::<(u32, u32)> {
+    pub fn create_text_listener(&mut self) -> bus::BusReader::<char> {
         let mut bus = Bus::new(64);
         let reader = bus.add_rx();
-        self.event_senders.frame_buffer.push(bus);
+        self.event_senders.text.push(bus);
         reader
     }
 }

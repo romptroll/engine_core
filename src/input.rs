@@ -27,11 +27,16 @@ use crate::window;
 pub use window::Key;
 pub use window::Mouse;
 
-pub type KeyEventDispatcher                 = bus::BusReader::<(Key, Action)>;
+/*pub type KeyEventDispatcher                 = bus::BusReader::<(Key, Action)>;
 pub type MouseEventDispatcher               = bus::BusReader::<(Mouse, Action)>;
 pub type MouseMoveEventDispatcher           = bus::BusReader::<(f32, f32)>;
 pub type MouseScrollEventDispatcher         = bus::BusReader::<(f32, f32)>;
-pub type FrameBufferSizeEventDispatcher     = bus::BusReader::<(u32, u32)>;
+pub type FrameBufferSizeEventDispatcher     = bus::BusReader::<(u32, u32)>;*/
+
+pub trait TextListener {
+    fn on_char_recived(&mut self, ch: char);
+    fn update(&mut self);
+}
 
 pub trait KeyListener {
     fn on_key_pressed(&mut self, key: Key);
@@ -45,6 +50,10 @@ pub trait MouseListener {
     fn on_mouse_pressed(&mut self, button: Mouse);
     fn on_mouse_released(&mut self, button: Mouse);
     fn update(&mut self);
+}
+
+pub struct InputTextHandler {
+    chars: Vec<char>,
 }
 
 pub struct InputKeyHandler {
@@ -68,12 +77,24 @@ pub struct InputMouseHandler {
 pub struct Input {
     key_handler         : InputKeyHandler,
     mouse_handler       : InputMouseHandler,
+    text_handler        : InputTextHandler,
     
     key_reciver         : bus::BusReader::<(Key, Action)>,
     mouse_reciver       : bus::BusReader::<(Mouse, Action)>,
     mouse_scroll_reciver: bus::BusReader::<(f32, f32)>,
     mouse_move_reciver  : bus::BusReader::<(f32, f32)>,
+    text_reciver        : bus::BusReader::<char>,
 } 
+
+impl TextListener for InputTextHandler {
+    fn on_char_recived(&mut self, ch: char) {
+        self.chars.push(ch);
+    }
+
+    fn update(&mut self) {
+        self.chars.clear();
+    }
+}
 
 impl KeyListener for InputKeyHandler {
     fn on_key_pressed(&mut self, key: Key)          { let index = key as usize; self.keys[index] = true; self.keys_down[index] = true;  }
@@ -104,6 +125,14 @@ impl MouseListener for InputMouseHandler {
         }
         self.scroll_x = 0.0;
         self.scroll_y = 0.0;
+    }
+}
+
+impl InputTextHandler {
+    fn new() -> InputTextHandler {
+        InputTextHandler {
+            chars: Vec::new(),
+        }
     }
 }
 
@@ -147,21 +176,24 @@ impl InputMouseHandler {
 
 impl Input {
     pub fn new(win: &mut Window) -> Input {
-        
         Input {
             key_handler: InputKeyHandler::new(),
             mouse_handler: InputMouseHandler::new(),
+            text_handler: InputTextHandler::new(),
 
             key_reciver: win.create_key_listener(),
             mouse_reciver: win.create_mouse_listener(),
             mouse_scroll_reciver: win.create_mouse_scroll_listener(),
             mouse_move_reciver: win.create_mouse_move_listener(),
+            text_reciver: win.create_text_listener(),
+            
         }
     }
 
     pub fn update(&mut self) {
         self.key_handler.update();   
         self.mouse_handler.update();
+        self.text_handler.update();
 
         let mut loop_done = false;
         while !loop_done {
@@ -226,6 +258,18 @@ impl Input {
                 }
             }
         }
+
+        let mut loop_done = false;
+        while !loop_done {
+            match self.text_reciver.try_recv() {
+                Ok(ch) => {
+                    self.text_handler.on_char_recived(ch);
+                },
+                Err(_) => {
+                    loop_done = true;
+                }
+            }
+        }
     }
   
     pub fn key(&self, key: Key)         -> bool { self.key_handler.key(key)        }
@@ -241,4 +285,6 @@ impl Input {
 
     pub fn mouse_scroll_x(&self) -> f32 { self.mouse_handler.mouse_scroll_x() }
     pub fn mouse_scroll_y(&self) -> f32 { self.mouse_handler.mouse_scroll_y() }
+
+    pub fn chars(&self) -> &Vec<char> { &self.text_handler.chars }
 }
