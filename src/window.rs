@@ -219,6 +219,13 @@ impl Window {
         reader   
     }
 
+    pub fn create_frame_buffer_listener(&mut self) -> bus::BusReader::<(u32, u32)> {
+        let mut bus = Bus::new(64);
+        let reader = bus.add_rx();
+        self.event_senders.frame_buffer.push(bus);
+        reader
+    }
+
     pub fn create_text_listener(&mut self) -> bus::BusReader::<char> {
         let mut bus = Bus::new(64);
         let reader = bus.add_rx();
