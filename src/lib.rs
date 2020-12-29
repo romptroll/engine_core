@@ -29,7 +29,7 @@ pub mod input;
 #[cfg(test)]
 mod tests {
     
-    use crate::{input::Input, window::{Window, Mouse, MouseButtonLeft}};
+    use crate::{input::Input, window::{Window, MouseButtonLeft}};
 
     #[test]
     fn multiple_windows() {
