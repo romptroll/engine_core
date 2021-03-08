@@ -99,7 +99,18 @@ impl Window {
 	    }
     }
 
-    pub fn set_size(&mut self, width: u32, height: u32) { self.glfw_window.set_size(width as i32, height as i32); }
+    pub fn set_size(&mut self, width: u32, height: u32) { 
+        self.glfw_window.set_size(width as i32, height as i32); 
+    
+    }
+
+    pub fn enable_cursor(&mut self, enabled: bool) {
+        if enabled {
+            self.glfw_window.set_cursor_mode(glfw::CursorMode::Normal)
+        } else {
+            self.glfw_window.set_cursor_mode(glfw::CursorMode::Disabled)
+        }
+    }
 
     pub fn swap_buffers(&mut self)  { self.glfw_window.swap_buffers() }
 
